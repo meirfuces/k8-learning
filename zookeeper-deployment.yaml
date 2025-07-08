@@ -1,0 +1,33 @@
+apiVersion: v1                # This is a core Kubernetes API version for basic resources like Service.
+kind: Service                 # We're creating a Service, which exposes a set of pods as a network service.
+metadata:
+  name: zookeeper             # The name of the Service. Other pods can find it using this name.
+spec:
+  ports:
+    - port: 2181              # The port the service will expose (Zookeeper's default client port).
+      name: client            # A name for the port (optional, but helpful for clarity).
+  selector:
+    app: zookeeper            # This service will route traffic to pods with label app=zookeeper.
+---
+apiVersion: apps/v1           # API version for Deployments (manages pods).
+kind: Deployment              # We're creating a Deployment, which manages a ReplicaSet of pods.
+metadata:
+  name: zookeeper             # The name of the Deployment.
+spec:
+  replicas: 1                 # Number of pod replicas to run (1 for dev/single node).
+  selector:
+    matchLabels:
+      app: zookeeper          # This Deployment manages pods with label app=zookeeper.
+  template:
+    metadata:
+      labels:
+        app: zookeeper        # The pods created will have this label.
+    spec:
+      containers:
+        - name: zookeeper     # Name of the container in the pod.
+          image: bitnami/zookeeper:3.8  # Docker image to use for Zookeeper.
+          ports:
+            - containerPort: 2181       # Exposes port 2181 inside the pod (for Zookeeper clients).
+          env:
+            - name: ALLOW_ANONYMOUS_LOGIN
+              value: "yes"    # Allows Zookeeper to start without authentication (for dev/testing). 

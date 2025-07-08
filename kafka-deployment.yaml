@@ -1,0 +1,50 @@
+apiVersion: v1                # Core API version for Service.
+kind: Service                 # We're creating a Service for Kafka.
+metadata:
+  name: kafka                 # The name of the Service (used for DNS inside the cluster).
+spec:
+  type: NodePort              # Expose the service outside the cluster
+  selector:
+    app: kafka                # This service will route traffic to pods with label app=kafka.
+  ports:
+    - port: 9092              # Internal cluster port
+      name: broker
+    - port: 9093              # External port for NodePort
+      nodePort: 30092         # NodePort for external access (choose a port between 30000-32767)
+      name: external
+---
+apiVersion: apps/v1           # API version for Deployments.
+kind: Deployment              # We're creating a Deployment for Kafka.
+metadata:
+  name: kafka                 # The name of the Deployment.
+spec:
+  replicas: 1                 # Number of Kafka broker pods (1 for dev).
+  selector:
+    matchLabels:
+      app: kafka              # This Deployment manages pods with label app=kafka.
+  template:
+    metadata:
+      labels:
+        app: kafka            # The pods created will have this label.
+    spec:
+      containers:
+        - name: kafka         # Name of the container in the pod.
+          image: bitnami/kafka:3.6  # Docker image to use for Kafka.
+          ports:
+            - containerPort: 9092   # Exposes port 9092 inside the pod (for internal clients).
+            - containerPort: 9093   # Exposes port 9093 inside the pod (for external clients).
+          env:
+            - name: KAFKA_BROKER_ID
+              value: "1"            # Unique ID for this Kafka broker.
+            - name: KAFKA_CFG_ZOOKEEPER_CONNECT
+              value: "zookeeper:2181"  # Tells Kafka how to find Zookeeper (using the service name).
+            - name: ALLOW_PLAINTEXT_LISTENER
+              value: "yes"           # Allows Kafka to accept unencrypted connections (for dev).
+            - name: KAFKA_CFG_LISTENERS
+              value: "PLAINTEXT://:9092,EXTERNAL://:9093"  # Two listeners: one for internal, one for external
+            - name: KAFKA_CFG_ADVERTISED_LISTENERS
+              value: "PLAINTEXT://kafka:9092,EXTERNAL://localhost:9093"
+            - name: KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP
+              value: "PLAINTEXT:PLAINTEXT,EXTERNAL:PLAINTEXT"
+            - name: KAFKA_CFG_INTER_BROKER_LISTENER_NAME
+              value: "PLAINTEXT" 
