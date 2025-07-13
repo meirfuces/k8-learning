@@ -22,12 +22,11 @@ Thumbs.db
 .env
 
 # Docker
-*.jar
+## (handled above for Gradle)
 *.war
 *.ear
 
-# Kubernetes
-*.yaml~
+
 
 # Others
 *.class
@@ -39,3 +38,11 @@ Thumbs.db
 # Ignore local test databases
 *.h2.db
 *.mv.db
+
+# Gradle
+/build/
+.gradle/
+!gradle/wrapper/gradle-wrapper.jar
+
+# Ignore Gradle JARs
+build/libs/*.jar

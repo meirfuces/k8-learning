@@ -5,7 +5,7 @@ FROM eclipse-temurin:21-jre
 WORKDIR /app
 
 # Copy the built jar file into the container
-ARG JAR_FILE=target/*.jar
+ARG JAR_FILE=build/libs/*.jar
 COPY ${JAR_FILE} app.jar
 
 # Expose the port the app runs on
