@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+data:
+  CUSTOM_MESSAGE: "Hello from ConfigMap!"
+  SPRING_DATASOURCE_URL: "jdbc:postgresql://postgres:5432/mydb"
+  SPRING_KAFKA_BOOTSTRAP_SERVERS: "kafka:9092"
